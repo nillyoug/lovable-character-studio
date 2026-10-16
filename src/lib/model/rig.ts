@@ -44,3 +44,13 @@ export function earActionOffset(action: EarAction, t: number, side: number) {
 export function tracePolygon(ctx: CanvasRenderingContext2D, points: Point[]) {
   ctx.beginPath(); points.forEach(([x, y], i) => i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)); ctx.closePath();
 }
+
+/** Eye openness 0..1 from a blink score. Higher sensitivity closes sooner; past the threshold the eye is fully shut (0). */
+export function eyeOpenness(blinkScore: number, sensitivity = 0.5) {
+  const start = 0.55 - sensitivity * 0.35; const closed = (blinkScore - start) / 0.22;
+  const c = Math.max(0, Math.min(1, closed)); return c > 0.85 ? 0 : 1 - c;
+}
+/** Mouth is either open or closed — no fading. Uses hysteresis so it doesn't flicker. */
+export function mouthIsOpen(jaw: number, sensitivity = 0.5, wasOpen = false) {
+  const v = jaw * (0.6 + sensitivity * 1.8); return wasOpen ? v > 0.18 : v > 0.28;
+}
